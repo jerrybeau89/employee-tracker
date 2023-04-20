@@ -117,15 +117,50 @@ const addRole = () =>{
   });  
 };
 const addEmployee = () =>{
-  inquirer.prompt([
-    {
-      type: "",
-      name: "",
-      message: "",
-    }
-  ]).then((response) => {
-
-  });
+  db.query("SELECT role.title, role.id FROM role;")
+  .then(([response])=> {
+    inquirer.prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "What is the first name of the new employee?",
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "What is the last name of the new employee?",
+      },
+      {
+        type: "input",
+        name: "role",
+        message: "Please select what role the new employee will have: ",
+        choices: response.map(({title, id}) => ({name: title, value: id}))
+      }
+    ]).then((response) => {
+      const newEmployee = [{firstName: `${response.firstName}`, lastName: `${response.lastNAme}`, role: `${response.role}`},];
+      db.query("SELECT employee.first_name, employee.last_name, employee.id FROM employee WHERE manager_id IS NULL;")
+      .then(([response]) => {
+        inquirer.prompt([
+          {
+            type: 'list',
+            name: 'manager',
+            message: "Please select who the new employee's manager will be: ",
+            choices: response.map(({first_name, last_name, id}) => ({ name: `${first_name}` `${last_name}`, value: id}))
+          }
+        ]).then((response) => {
+          const newManager = response.manager;
+          newEmployee.push(newManager);
+          db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?)', newEmployee, (err, res) => {
+            if (err) {
+              return console.log(err);
+            }
+            return console.log("Employee: " + newEmployee + "added!");
+          });
+          initialQuestions();
+        });
+      });
+    });
+  });  
 };
 const updateEmployee = () =>{
   db.query(
