@@ -1,7 +1,7 @@
 const mysql = require('mysql2')
 require('dotenv').config();
 
-// Connect to database
+// Connects to database and uses a .env file to obtain the password
 const db = mysql.createConnection(
   {
     host: 'localhost',
